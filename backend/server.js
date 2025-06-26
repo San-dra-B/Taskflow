@@ -6,6 +6,10 @@ require('./connection');
 const userModel=require('./models/userData');
 const taskModel=require('./models/taskData');
 const projectModel=require('./models/projectData');
+const TaskModel = require('./models/taskData');
+
+
+
 app.use(cors());
 app.use(express.json()); 
 
@@ -17,6 +21,7 @@ try{const data=await userModel.find();
     console.log(err);
 }
 })
+
 
 // API /to fetch taskdata from DB
 app.get('/tasks',async(req,res)=>{  
@@ -37,8 +42,39 @@ try{const data=await projectModel.find();
 })
 
 
+// API for updating status
+app.put('/updatestatus/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const result = await TaskModel.findByIdAndUpdate(id, { status });
+
+    if (!result) return res.send("Task not found");
+
+    res.send("Status updated successfully");
+  } catch (err) {
+    res.send("Error updating status");
+  }
+});
+
+// API for comments
+app.put('/updatecomment/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { comment } = req.body;
+
+    const result = await TaskModel.findByIdAndUpdate(id, { comment });
+    if (!result) return res.send("Task not found");
+
+    res.send("Comment updated successfully");
+  } catch (err) {
+    res.send("Error updating comment");
+  }
+});
+
 
 // server in listening mode
 app.listen(PORT,()=>{ 
     console.log(`The Server is listening at ${PORT}`);
-});
+}); 

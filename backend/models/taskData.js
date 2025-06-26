@@ -1,17 +1,19 @@
-const mongoose=require('mongoose');
-const taskschema=mongoose.Schema({
-    
+const mongoose = require('mongoose');
 
-    _id:mongoose.Schema.Types.ObjectId,
-    title:"string",
-    project:"string",
-    description:"string",
-    status:"string",
-    comment:"string",
-    assignedTo:"string",
-    createdBy:"string"
-    
+const taskSchema = new mongoose.Schema({
+  _id: mongoose.Schema.Types.ObjectId,
+  title: String,
+  project: String,
+  description: String,
+  status: {
+    type: String,
+    enum: ['To Do', 'In Progress', 'Done'],
+    default: 'To Do'
+  },
+  comment: String,
+  assignedTo: String,
+  createdBy: String
+});
 
-})
-const taskdata=mongoose.model('Task',taskschema); 
-module.exports=taskdata;
+const TaskModel = mongoose.model('Task', taskSchema);
+module.exports = TaskModel;

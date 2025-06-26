@@ -33,25 +33,41 @@ const Task = () => {
   );
 
   useEffect(() => {
-  if (assignedTasks.length > 0) {
-    console.log("Assigned Tasks:", assignedTasks);
-  }
-}, [assignedTasks]);
+    if (assignedTasks.length > 0) {
+      console.log("Assigned Tasks:", assignedTasks);
+    }
+  }, [assignedTasks]);
 
-  const handleStatusChange = (id, newStatus) => {
-    setTasks(prev =>
-      prev.map(task =>
-        task._id === id ? { ...task, status: newStatus } : task
-      )
-    );
+  const handleStatusChange = async (taskId, newStatus) => {
+    try {
+      await axios.put(`http://localhost:4000/updatestatus/${taskId}`, {
+        status: newStatus,
+      });
+
+      setTasks(prev =>
+        prev.map(task =>
+          task._id === taskId ? { ...task, status: newStatus } : task
+        )
+      );
+    } catch (err) {
+      console.error("Error updating status:", err);
+    }
   };
 
-  const handleCommentChange = (id, newComment) => {
-    setTasks(prev =>
-      prev.map(task =>
-        task._id === id ? { ...task, comment: newComment } : task
-      )
-    );
+  const handleCommentChange = async (taskId, newComment) => {
+    try {
+      await axios.put(`http://localhost:4000/updatecomment/${taskId}`, {
+        comment: newComment,
+      });
+
+      setTasks(prev =>
+        prev.map(task =>
+          task._id === taskId ? { ...task, comment: newComment } : task
+        )
+      );
+    } catch (err) {
+      console.error("Error:", err);
+    }
   };
 
   return (
@@ -73,6 +89,7 @@ const Task = () => {
             </TableRow>
           </TableHead>
           <TableBody>
+
             {assignedTasks.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} align="center">
@@ -105,6 +122,7 @@ const Task = () => {
                 </TableRow>
               ))
             )}
+
           </TableBody>
         </Table>
       </TableContainer>

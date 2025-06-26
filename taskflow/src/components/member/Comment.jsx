@@ -2,6 +2,9 @@ import React from 'react';
 import { TextField } from '@mui/material';
 
 const Comment = ({ value, onChange }) => (
+
+  
+
   <TextField
     variant="outlined"
     size="small"
@@ -12,6 +15,7 @@ const Comment = ({ value, onChange }) => (
     multiline
     maxRows={2}
   />
+  
 );
 
 export default Comment;
