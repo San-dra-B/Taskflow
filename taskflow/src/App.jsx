@@ -22,7 +22,7 @@ const App = () => {
 
       {/* Admin Dashboard */}
       <Route path="/dashadmin" element={<DashAdmin />}>
-        <Route index element={<Navigate to="projects" />} />
+        <Route index element={<Navigate to="/dashadmin" />} />
         <Route path="addproject" element={<ProjectForm />} />
         <Route path="editproject" element={<ProjectForm />} />
         <Route path="projects" element={<ProjectList />} />
