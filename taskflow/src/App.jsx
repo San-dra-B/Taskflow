@@ -4,6 +4,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Signin from './components/member/Signin';
 
 import DashAdmin from './components/admin/DashAdmin';
+import ProjectForm from './components/admin/ProjectForm';
 import ProjectList from './components/admin/ProjectList';
 import TaskList from './components/admin/TaskList';
 import Team from './components/admin/Team';
@@ -22,6 +23,8 @@ const App = () => {
       {/* Admin Dashboard */}
       <Route path="/dashadmin" element={<DashAdmin />}>
         <Route index element={<div>Welcome Admin</div>} />
+        <Route path="addproject" element={<ProjectForm />} />
+        <Route path="editproject" element={<ProjectForm />} />
         <Route path="projects" element={<ProjectList />} />
         <Route path="tasks" element={<TaskList />} />
         <Route path="team" element={<Team />} />

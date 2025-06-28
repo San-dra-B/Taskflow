@@ -41,6 +41,40 @@ try{const data=await projectModel.find();
 }
 })
 
+// API /to add a new project
+app.post('/projects', async (req, res) => {  
+  try {
+    const item = req.body;
+    const newProject = new projectModel(item);
+    await newProject.save();
+    res.send("Project added successfully");
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Error adding project");
+  }
+});
+
+// API /to update a project by ID
+app.put('/projects/:id', async (req, res) => {  
+  try {
+    const updatedProject = await projectModel.findByIdAndUpdate(req.params.id, req.body);
+    res.send("Project updated successfully");
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Error updating project");
+  }
+});
+
+// API /to delete a project by ID
+app.delete('/projects/:id', async (req, res) => {  
+  try {
+    await projectModel.findByIdAndDelete(req.params.id);
+    res.send("Project deleted successfully");
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Error deleting project");
+  }
+});
 
 // API for updating status
 app.put('/updatestatus/:id', async (req, res) => {

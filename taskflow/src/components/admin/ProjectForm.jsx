@@ -1,39 +1,93 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, Stack } from '@mui/material';
+import {
+  Box, Stack, TextField, Button, Typography,
+  Dialog
+} from '@mui/material';
+import axios from 'axios';
+import { useLocation, useNavigate } from 'react-router-dom';
 
-const ProjectForm = ({ initialData, onClose, onSave }) => {
-  const [form, setForm] = useState({ title: '', description: '', start: '', end: '' });
+const ProjectForm = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
 
+  const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+
+  const [form, setForm] = useState({
+    title: '',
+    description: '',
+    start: '',
+    end: '',
+    createdBy: loggedInUser?.name || 'Admin',  // fallback if no user found
+  });
+  
   useEffect(() => {
-    if (initialData) setForm(initialData);
-  }, [initialData]);
+    if (location.state?.project) {
+      setForm({
+        title: location.state.project.title,
+        description: location.state.project.description,
+        start: location.state.project.start,
+        end: location.state.project.end,
+        createdBy: location.state.project.createdBy,
+        _id: location.state.project._id
+      });
+    }
+  }, [location.state]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
+
+  const fetchValue = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = () => {
-    if (!form.title || !form.start || !form.end) return alert('Please fill all fields');
-    onSave(form);
+
+  const submitData = () => {
+    const { title, description, start, end } = form;
+
+    if (!title || !description || !start || !end) {
+      return alert('Please fill all fields');
+    }
+
+    if (form._id) {
+      // Update
+      axios.put(`http://localhost:4000/projects/${form._id}`, form)
+        .then(() => {
+          alert('Project updated successfully');
+          navigate('/dashadmin/projects');
+        })
+        .catch((error) => {
+          console.error('Error updating project:', error);
+          alert('Failed to update project');
+        });
+    } else {
+      // Add
+      axios.post('http://localhost:4000/projects', form)
+        .then(() => {
+          alert('Project created successfully');
+          navigate('/dashadmin/projects');
+        })
+        .catch((error) => {
+          console.error('Error creating project:', error);
+          alert('Failed to create project');
+        });
+    }
   };
 
   return (
-    <Dialog open onClose={onClose}>
-      <DialogTitle>{initialData ? 'Edit Project' : 'Add Project'}</DialogTitle>
-      <DialogContent>
-        <Stack spacing={2} sx={{ mt: 1, minWidth: 300 }}>
-          <TextField label="Title" name="title" value={form.title} onChange={handleChange} fullWidth />
-          <TextField label="Description" name="description" value={form.description} onChange={handleChange} fullWidth />
-          <TextField label="Start Date" name="start" type="date" value={form.start} onChange={handleChange} InputLabelProps={{ shrink: true }} fullWidth />
-          <TextField label="End Date" name="end" type="date" value={form.end} onChange={handleChange} InputLabelProps={{ shrink: true }} fullWidth />
-        </Stack>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button variant="contained" onClick={handleSubmit}>{initialData ? 'Update' : 'Create'}</Button>
-      </DialogActions>
-    </Dialog>
+    
+    <Box sx={{ p: 4 }}>
+      <Typography variant="h6" sx={{ mb: 2 }}>
+        {form._id ? 'Edit Project' : 'Add Project'}
+      </Typography>
+      <Stack spacing={2} sx={{ maxWidth: 400 }}>
+        <TextField name="title" label="Title" value={form.title} onChange={fetchValue} fullWidth />
+        <TextField name="description" label="Description" value={form.description} onChange={fetchValue} fullWidth />
+        <TextField name="start" type="date" label="Start Date" value={form.start} onChange={fetchValue} InputLabelProps={{ shrink: true }} fullWidth />
+        <TextField name="end" type="date" label="End Date" value={form.end} onChange={fetchValue} InputLabelProps={{ shrink: true }} fullWidth />
+        <Button variant="contained" onClick={submitData}>
+          {form._id ? 'Update Project' : 'Create Project'}
+        </Button>
+      </Stack>
+    </Box>
+
   );
 };
 
