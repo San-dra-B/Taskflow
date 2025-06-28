@@ -4,7 +4,7 @@ import {
   TableHead, TableRow, Paper
 } from '@mui/material';
 import axios from 'axios';
-import ProjectForm from './ProjectForm'; // Make sure the path is correct
+import ProjectForm from './ProjectForm'; 
 
 const ProjectList = () => {
   const [projects, setProjects] = useState([]);

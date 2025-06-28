@@ -3,18 +3,38 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   TextField, MenuItem, Button, Stack
 } from '@mui/material';
+import axios from 'axios';
 
-const statusOptions = ['To Do', 'In Progress', 'Done'];
+const TaskForm = ({ open, onClose, task, members, projects }) => {
+  const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
 
-const TaskForm = ({ task, members, projects, onSubmit, onCancel }) => {
-  const [form, setForm] = useState({
-    title: '', description: '', dueDate: '',
-    assignedTo: '', project: '', status: 'To Do'
-  });
+  const initialForm = {
+    title: '',
+    description: '',
+    dueDate: '',
+    assignedTo: '',
+    project: '',
+    createdBy: loggedInUser?.name || 'Admin'
+  };
 
-  useEffect(() => {
-    if (task) setForm(task);
-  }, [task]);
+  const [form, setForm] = useState(initialForm);
+
+useEffect(() => {
+  if (task) {
+    const projectId =
+      typeof task.project === 'object' && task.project !== null
+        ? task.project._id
+        : task.project;
+
+    setForm({
+      ...task,
+      project: projectId,
+      createdBy: task.createdBy || loggedInUser?.name || 'Admin'
+    });
+  } else {
+    setForm(initialForm);
+  }
+}, [task, projects]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -22,13 +42,31 @@ const TaskForm = ({ task, members, projects, onSubmit, onCancel }) => {
   };
 
   const handleSubmit = () => {
-    if (form.title && form.assignedTo && form.project && form.dueDate) {
-      onSubmit(form);
+    const { title, description, dueDate, assignedTo, project } = form;
+    if (!title || !description || !dueDate || !assignedTo || !project) {
+      alert('Please fill all required fields');
+      return;
+    }
+
+    if (task?._id) {
+      axios.put(`http://localhost:4000/tasks/${task._id}`, form)
+        .then(() => {
+          alert('Task updated');
+          onClose();
+        })
+        .catch(err => alert('Failed to update task'));
+    } else {
+      axios.post('http://localhost:4000/tasks', form)
+        .then(() => {
+          alert('Task added');
+          onClose();
+        })
+        .catch(err => alert('Failed to add task'));
     }
   };
 
   return (
-    <Dialog open onClose={onCancel} fullWidth maxWidth="sm">
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>{task ? 'Edit Task' : 'Add Task'}</DialogTitle>
       <DialogContent>
         <Stack spacing={2} mt={1}>
@@ -36,22 +74,24 @@ const TaskForm = ({ task, members, projects, onSubmit, onCancel }) => {
           <TextField name="description" label="Description" value={form.description} onChange={handleChange} fullWidth />
           <TextField name="dueDate" label="Due Date" type="date" value={form.dueDate} onChange={handleChange} InputLabelProps={{ shrink: true }} fullWidth />
           <TextField name="assignedTo" label="Assign To" select value={form.assignedTo} onChange={handleChange} fullWidth>
-            {members.map(m => <MenuItem key={m._id} value={m._id}>{m.name}</MenuItem>)}
+            {members.filter(m => m.role !== 'Admin').map(m => (
+              <MenuItem key={m._id} value={m.name}>{m.name}</MenuItem>
+            ))}
           </TextField>
           <TextField name="project" label="Project" select value={form.project} onChange={handleChange} fullWidth>
-            {projects.map(p => <MenuItem key={p._id} value={p._id}>{p.title}</MenuItem>)}
-          </TextField>
-          <TextField name="status" label="Status" select value={form.status} onChange={handleChange} fullWidth>
-            {statusOptions.map(status => <MenuItem key={status} value={status}>{status}</MenuItem>)}
+             {projects.map(p => (
+             <MenuItem key={p._id} value={p._id}>{p.title}</MenuItem>
+             ))}
           </TextField>
         </Stack>
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={onCancel}>Cancel</Button>
-        <Button variant="contained" onClick={handleSubmit}>{task ? 'Update' : 'Add'}</Button>
+        <Button onClick={onClose}>Cancel</Button>
+        <Button variant="contained" onClick={handleSubmit}>
+          {task ? 'Update' : 'Add'}
+        </Button>
       </DialogActions>
-      
     </Dialog>
   );
 };

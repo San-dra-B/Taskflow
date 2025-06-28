@@ -14,7 +14,7 @@ const Task = () => {
   const { tasks, setTasks, currentUser } = useOutletContext();
 
   useEffect(() => {
-    console.log("👤 Current user:", currentUser);
+    console.log(" Current user:", currentUser);
   }, [currentUser]);
 
   useEffect(() => {

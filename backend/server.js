@@ -4,11 +4,8 @@ const cors=require('cors');
 const PORT=4000;
 require('./connection'); 
 const userModel=require('./models/userData');
-const taskModel=require('./models/taskData');
 const projectModel=require('./models/projectData');
-const TaskModel = require('./models/taskData');
-
-
+const taskModel = require('./models/taskData');
 
 app.use(cors());
 app.use(express.json()); 
@@ -22,15 +19,45 @@ try{const data=await userModel.find();
 }
 })
 
+app.get('/tasks', async (req, res) => {
+  try {
+    const tasks = await taskModel.find().populate('project');
+    res.json(tasks);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
-// API /to fetch taskdata from DB
-app.get('/tasks',async(req,res)=>{  
-try{const data=await taskModel.find();
-    res.send(data);
-}catch(err){
-    console.log(err);
-}
-})
+app.post('/tasks', async (req, res) => {
+  try {
+    const item = new taskModel(req.body);
+    await item.save();
+    res.send("Task added successfully");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error adding task");
+  }
+});
+
+app.put('/tasks/:id', async (req, res) => {
+  try {
+    await taskModel.findByIdAndUpdate(req.params.id, req.body);
+    res.send("Task updated successfully");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error updating task");
+  }
+});
+
+app.delete('/tasks/:id', async (req, res) => {
+  try {
+    await taskModel.findByIdAndDelete(req.params.id);
+    res.send("Task deleted successfully");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error deleting task");
+  }
+});
 
 // API /to fetch projectdata from DB
 app.get('/projects',async(req,res)=>{  

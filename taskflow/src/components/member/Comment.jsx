@@ -3,8 +3,6 @@ import { TextField } from '@mui/material';
 
 const Comment = ({ value, onChange }) => (
 
-  
-
   <TextField
     variant="outlined"
     size="small"

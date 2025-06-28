@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 
 const taskSchema = new mongoose.Schema({
-  _id: mongoose.Schema.Types.ObjectId,
-  title: String,
-  project: String,
+  title: { type: String, required: true },
+  project: { type: mongoose.Schema.Types.ObjectId, ref: 'project', required: true },
   description: String,
+  dueDate: String, 
   status: {
     type: String,
     enum: ['To Do', 'In Progress', 'Done'],
@@ -15,5 +15,5 @@ const taskSchema = new mongoose.Schema({
   createdBy: String
 });
 
-const TaskModel = mongoose.model('Task', taskSchema);
-module.exports = TaskModel;
+const taskModel = mongoose.model('tasks', taskSchema);
+module.exports = taskModel;
