@@ -42,25 +42,36 @@ const ProjectForm = ({ open, handleClose, project }) => {
   };
 
   const submitData = () => {
-    const { title, description, start, end } = form;
-    if (!title || !description || !start || !end) {
-      return alert('Please fill all fields');
-    }
+  const { title, description, start, end } = form;
 
-    const apiCall = form._id
-      ? axios.put(`http://localhost:4000/projects/${form._id}`, form)
-      : axios.post('http://localhost:4000/projects', form);
+  if (!title || !description || !start || !end) {
+    return alert('Please fill all fields');
+  }
 
-    apiCall
+  form.createdBy = loggedInUser?.name || 'Admin';
+
+  if (form._id) {
+    axios.put(`http://localhost:4000/projects/${form._id}`, form)
       .then(() => {
-        alert(`Project ${form._id ? 'updated' : 'created'} successfully`);
-        handleClose();
+        alert('Project updated successfully');
+        handleClose();  
       })
       .catch((error) => {
-        console.error('Error saving project:', error);
-        alert('Failed to save project');
+        console.error('Error updating project:', error);
+        alert('Failed to update project');
       });
-  };
+  } else {
+    axios.post('http://localhost:4000/projects', form)
+      .then(() => {
+        alert('Project created successfully');
+        handleClose();  
+      })
+      .catch((error) => {
+        console.error('Error creating project:', error);
+        alert('Failed to create project');
+      });
+  }
+};
 
   return (
     <Dialog open={open} onClose={handleClose}>
