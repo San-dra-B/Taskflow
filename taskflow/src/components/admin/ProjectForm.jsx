@@ -1,15 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Box, Stack, TextField, Button, Typography,
-  Dialog
+  Dialog, DialogTitle, DialogContent, DialogActions,
+  TextField, Button, Stack
 } from '@mui/material';
 import axios from 'axios';
-import { useLocation, useNavigate } from 'react-router-dom';
 
-const ProjectForm = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-
+const ProjectForm = ({ open, handleClose, project }) => {
   const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
 
   const [form, setForm] = useState({
@@ -17,77 +13,73 @@ const ProjectForm = () => {
     description: '',
     start: '',
     end: '',
-    createdBy: loggedInUser?.name || 'Admin',  // fallback if no user found
+    createdBy: loggedInUser?.name || 'Admin',
   });
-  
+
   useEffect(() => {
-    if (location.state?.project) {
+    if (project) {
       setForm({
-        title: location.state.project.title,
-        description: location.state.project.description,
-        start: location.state.project.start,
-        end: location.state.project.end,
-        createdBy: location.state.project.createdBy,
-        _id: location.state.project._id
+        title: project.title || '',
+        description: project.description || '',
+        start: project.start || '',
+        end: project.end || '',
+        createdBy: project.createdBy || loggedInUser?.name || 'Admin',
+        _id: project._id
+      });
+    } else {
+      setForm({
+        title: '',
+        description: '',
+        start: '',
+        end: '',
+        createdBy: loggedInUser?.name || 'Admin',
       });
     }
-  }, [location.state]);
-
+  }, [project]);
 
   const fetchValue = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-
   const submitData = () => {
     const { title, description, start, end } = form;
-
     if (!title || !description || !start || !end) {
       return alert('Please fill all fields');
     }
 
-    if (form._id) {
-      // Update
-      axios.put(`http://localhost:4000/projects/${form._id}`, form)
-        .then(() => {
-          alert('Project updated successfully');
-          navigate('/dashadmin/projects');
-        })
-        .catch((error) => {
-          console.error('Error updating project:', error);
-          alert('Failed to update project');
-        });
-    } else {
-      // Add
-      axios.post('http://localhost:4000/projects', form)
-        .then(() => {
-          alert('Project created successfully');
-          navigate('/dashadmin/projects');
-        })
-        .catch((error) => {
-          console.error('Error creating project:', error);
-          alert('Failed to create project');
-        });
-    }
+    const apiCall = form._id
+      ? axios.put(`http://localhost:4000/projects/${form._id}`, form)
+      : axios.post('http://localhost:4000/projects', form);
+
+    apiCall
+      .then(() => {
+        alert(`Project ${form._id ? 'updated' : 'created'} successfully`);
+        handleClose();
+      })
+      .catch((error) => {
+        console.error('Error saving project:', error);
+        alert('Failed to save project');
+      });
   };
 
   return (
-    
-    <Box sx={{ p: 4 }}>
-      <Typography variant="h6" sx={{ mb: 2 }}>
-        {form._id ? 'Edit Project' : 'Add Project'}
-      </Typography>
-      <Stack spacing={2} sx={{ maxWidth: 400 }}>
-        <TextField name="title" label="Title" value={form.title} onChange={fetchValue} fullWidth />
-        <TextField name="description" label="Description" value={form.description} onChange={fetchValue} fullWidth />
-        <TextField name="start" type="date" label="Start Date" value={form.start} onChange={fetchValue} InputLabelProps={{ shrink: true }} fullWidth />
-        <TextField name="end" type="date" label="End Date" value={form.end} onChange={fetchValue} InputLabelProps={{ shrink: true }} fullWidth />
+    <Dialog open={open} onClose={handleClose}>
+      <DialogTitle>{form._id ? 'Edit Project' : 'Add Project'}</DialogTitle>
+      <DialogContent>
+        <Stack spacing={2} sx={{ mt: 1, minWidth: 400 }}>
+          <TextField name="title" label="Title" value={form.title} onChange={fetchValue} fullWidth />
+          <TextField name="description" label="Description" value={form.description} onChange={fetchValue} fullWidth />
+          <TextField name="start" type="date" label="Start Date" value={form.start} onChange={fetchValue} InputLabelProps={{ shrink: true }} fullWidth />
+          <TextField name="end" type="date" label="End Date" value={form.end} onChange={fetchValue} InputLabelProps={{ shrink: true }} fullWidth />
+        </Stack>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleClose}>Cancel</Button>
         <Button variant="contained" onClick={submitData}>
-          {form._id ? 'Update Project' : 'Create Project'}
+          {form._id ? 'Update' : 'Create'}
         </Button>
-      </Stack>
-    </Box>
-
+      </DialogActions>
+    </Dialog>
   );
 };
 
