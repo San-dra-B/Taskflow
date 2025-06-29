@@ -13,7 +13,7 @@ const Sidebar = () => (
     <Box sx={{ overflow: 'auto' }}>
       <List>
         <ListItem disablePadding>
-        <ListItemButton component={Link} to="/dashadmin">
+        <ListItemButton component={Link} to="adminboard">
         <ListItemIcon><DashboardIcon /></ListItemIcon>
         <ListItemText primary="Dashboard" />
         </ListItemButton>
