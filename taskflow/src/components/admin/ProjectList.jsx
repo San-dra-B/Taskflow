@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Box, Typography, Button, Table, TableBody, TableCell, TableContainer,
-  TableHead, TableRow, Paper
+  Box, Typography, Button, Table, TableBody, TableCell,
+  TableContainer, TableHead, TableRow, Paper, Stack,
+  IconButton
 } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+
 import axios from 'axios';
-import ProjectForm from './ProjectForm'; 
+import ProjectForm from './ProjectForm';
 
 const ProjectList = () => {
   const [projects, setProjects] = useState([]);
@@ -13,8 +17,8 @@ const ProjectList = () => {
 
   const fetchProjects = () => {
     axios.get('http://localhost:4000/projects')
-      .then((res) => setProjects(res.data))
-      .catch((err) => console.error('Error fetching projects:', err));
+      .then(res => setProjects(res.data))
+      .catch(err => console.error('Error fetching projects:', err));
   };
 
   useEffect(() => {
@@ -32,23 +36,26 @@ const ProjectList = () => {
   };
 
   const handleDelete = (id) => {
-    axios.delete(`http://localhost:4000/projects/${id}`)
-      .then(() => fetchProjects())
-      .catch((error) => console.error("Error deleting project:", error));
+    if (window.confirm('Delete this project?')) {
+      axios.delete(`http://localhost:4000/projects/${id}`)
+        .then(() => fetchProjects())
+        .catch(err => console.error('Error deleting project:', err));
+    }
   };
 
   const handleClose = () => {
     setOpen(false);
-    fetchProjects(); // Refresh after form closes
+    fetchProjects();
   };
 
   return (
     <Box sx={{ p: 4 }}>
-      <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold' }}>All Projects</Typography>
-
-      <Button variant="contained" sx={{ mb: 2 }} onClick={handleAdd}>
-        + Add Project
-      </Button>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+        <Typography variant="h5" fontWeight="bold">All Projects</Typography>
+        <Button variant="contained" onClick={handleAdd}>
+          + Add Project
+        </Button>
+      </Stack>
 
       <TableContainer component={Paper}>
         <Table>
@@ -56,10 +63,9 @@ const ProjectList = () => {
             <TableRow>
               <TableCell><b>Title</b></TableCell>
               <TableCell><b>Description</b></TableCell>
-              <TableCell align="center"><b>Start Date</b></TableCell>
-              <TableCell align="center"><b>End Date</b></TableCell>
-              <TableCell align="center"><b>Edit</b></TableCell>
-              <TableCell align="center"><b>Delete</b></TableCell>
+              <TableCell><b>Start Date</b></TableCell>
+              <TableCell><b>End Date</b></TableCell>
+              <TableCell align="center"><b></b></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -67,17 +73,17 @@ const ProjectList = () => {
               <TableRow key={project._id}>
                 <TableCell>{project.title}</TableCell>
                 <TableCell>{project.description}</TableCell>
-                <TableCell align="center">{project.start}</TableCell>
-                <TableCell align="center">{project.end}</TableCell>
+                <TableCell>{project.start || 'N/A'}</TableCell>
+                <TableCell>{project.end || 'N/A'}</TableCell>
                 <TableCell align="center">
-                  <Button variant="outlined" onClick={() => handleEdit(project)}>
-                    Edit
-                  </Button>
-                </TableCell>
-                <TableCell align="center">
-                  <Button variant="outlined" color="error" onClick={() => handleDelete(project._id)}>
-                    Delete
-                  </Button>
+                  <Stack direction="row" spacing={1} justifyContent="center" alignItems="center">
+                    <IconButton color="primary" onClick={() => handleEdit(project)}>
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton color="error" onClick={() => handleDelete(project._id)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </Stack>
                 </TableCell>
               </TableRow>
             ))}
@@ -86,7 +92,6 @@ const ProjectList = () => {
       </TableContainer>
 
       <ProjectForm open={open} handleClose={handleClose} project={selectedProject} />
-
     </Box>
   );
 };

@@ -164,21 +164,25 @@ const TaskList = () => {
                 <TableCell>{task.project?.title || 'Unknown'}</TableCell>
                 <TableCell>{task.dueDate}</TableCell>
                 <TableCell align="center">
+
                   <Stack direction="row" spacing={1} justifyContent="center" alignItems="center">
+                    
                     <IconButton color="primary" onClick={() => handleEdit(task)}>
                       <EditIcon />
                     </IconButton>
+
                     <IconButton color="error" onClick={() => handleDelete(task._id)}>
                       <DeleteIcon />
                     </IconButton>
+
                     <IconButton
                       onClick={(e) => {
                         setMenuAnchor(e.currentTarget);
                         setMenuTask(task);
-                      }}
-                    >
+                      }}>
                       <MoreVertIcon />
                     </IconButton>
+
                   </Stack>
                 </TableCell>
               </TableRow>
