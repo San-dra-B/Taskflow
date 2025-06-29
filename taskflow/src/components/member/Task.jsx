@@ -100,7 +100,9 @@ const Task = () => {
               assignedTasks.map((task, index) => (
                 <TableRow key={task._id || index}>
                   <TableCell>{task.title}</TableCell>
-                  <TableCell>{task.project}</TableCell>
+                  <TableCell>
+                   {typeof task.project === 'object' ? task.project?.title : task.project}
+                  </TableCell>
                   <TableCell>{task.description}</TableCell>
                   <TableCell>{task.createdBy}</TableCell>
                   <TableCell align="center">

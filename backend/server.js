@@ -109,7 +109,7 @@ app.put('/updatestatus/:id', async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    const result = await TaskModel.findByIdAndUpdate(id, { status });
+    const result = await taskModel.findByIdAndUpdate(id, { status });
 
     if (!result) return res.send("Task not found");
 
@@ -125,7 +125,7 @@ app.put('/updatecomment/:id', async (req, res) => {
     const { id } = req.params;
     const { comment } = req.body;
 
-    const result = await TaskModel.findByIdAndUpdate(id, { comment });
+    const result = await taskModel.findByIdAndUpdate(id, { comment });
     if (!result) return res.send("Task not found");
 
     res.send("Comment updated successfully");
