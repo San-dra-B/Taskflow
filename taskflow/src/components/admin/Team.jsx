@@ -1,34 +1,53 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box, Typography, Table, TableBody, TableCell, TableContainer,
   TableHead, TableRow, Paper, Stack, Button
 } from '@mui/material';
-import Teamadd from './Teamadd';
-
-const initialTeam = [
-  { id: 1, name: 'Athira', email: 'athira@gmail.com', role: 'admin' },
-  { id: 2, name: 'Ravi', email: 'ravi@gmail.com', role: 'team-member' },
-  { id: 3, name: 'Priya', email: 'priya@gmail.com', role: 'team-member' },
-];
+import TeamAdd from './TeamAdd';
+import axios from 'axios';
 
 const Team = () => {
-  const [team, setTeam] = useState(initialTeam);
+  const [team, setTeam] = useState([]);
   const [editMember, setEditMember] = useState(null);
   const [adding, setAdding] = useState(false);
 
-  const handleSave = (member) => {
-    if (editMember) {
-      setTeam(prev => prev.map(t => t.id === member.id ? member : t));
-    } else {
-      setTeam(prev => [...prev, { ...member, id: Date.now() }]);
+  const fetchTeam = async () => {
+    try {
+      const res = await axios.get('http://localhost:4000/teams');
+      setTeam(res.data);
+    } catch (err) {
+      console.error('Error fetching team:', err);
     }
-    setEditMember(null);
-    setAdding(false);
   };
 
-  const handleDelete = (id) => {
-    const confirm = window.confirm('Delete this team member?');
-    if (confirm) setTeam(prev => prev.filter(m => m.id !== id));
+  useEffect(() => {
+    fetchTeam();
+  }, []);
+
+  const handleSave = async (member) => {
+    try {
+      if (editMember) {
+        await axios.put(`http://localhost:4000/teams/${member._id}`, member);
+      } else {
+        await axios.post('http://localhost:4000/teams', member);
+      }
+      fetchTeam();
+      setEditMember(null);
+      setAdding(false);
+    } catch (err) {
+      console.error('Error saving member:', err);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('Delete this team member?')) {
+      try {
+        await axios.delete(`http://localhost:4000/teams/${id}`);
+        fetchTeam();
+      } catch (err) {
+        console.error('Error deleting member:', err);
+      }
+    }
   };
 
   return (
@@ -41,7 +60,7 @@ const Team = () => {
       )}
 
       {(adding || editMember) && (
-        <Teamadd
+        <TeamAdd
           initialData={editMember}
           onSave={handleSave}
           onCancel={() => {
@@ -63,7 +82,7 @@ const Team = () => {
           </TableHead>
           <TableBody>
             {team.map((member) => (
-              <TableRow key={member.id}>
+              <TableRow key={member._id}>
                 <TableCell>{member.name}</TableCell>
                 <TableCell>{member.email}</TableCell>
                 <TableCell>{member.role}</TableCell>
@@ -72,7 +91,7 @@ const Team = () => {
                     <Button variant="outlined" color="secondary" onClick={() => setEditMember(member)}>
                       Edit
                     </Button>
-                    <Button variant="outlined" color="error" onClick={() => handleDelete(member.id)}>
+                    <Button variant="outlined" color="error" onClick={() => handleDelete(member._id)}>
                       Delete
                     </Button>
                   </Stack>

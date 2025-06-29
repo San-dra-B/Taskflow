@@ -8,7 +8,14 @@ const TeamAdd = ({ initialData, onSave, onCancel }) => {
   const [form, setForm] = useState({ name: '', email: '', role: '' });
 
   useEffect(() => {
-    if (initialData) setForm(initialData);
+    if (initialData) {
+      setForm({
+        _id: initialData._id,
+        name: initialData.name,
+        email: initialData.email,
+        role: initialData.role
+      });
+    }
   }, [initialData]);
 
   const handleChange = (e) => {
@@ -16,7 +23,10 @@ const TeamAdd = ({ initialData, onSave, onCancel }) => {
   };
 
   const handleSubmit = () => {
-    if (!form.name || !form.email || !form.role) return alert('All fields required');
+    if (!form.name || !form.email || !form.role) {
+      alert('All fields are required');
+      return;
+    }
     onSave(form);
     setForm({ name: '', email: '', role: '' });
   };

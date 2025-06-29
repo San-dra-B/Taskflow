@@ -10,10 +10,10 @@ const taskModel = require('./models/taskData');
 app.use(cors());
 app.use(express.json()); 
 
-//  API /to fetch all team members from DB
+// ✅ API to fetch all team members from DB
 app.get('/teams', async (req, res) => {
   try {
-    const data = await Team.find();
+    const data = await userModel.find();
     res.send(data);
   } catch (err) {
     console.error(err);
@@ -21,10 +21,9 @@ app.get('/teams', async (req, res) => {
   }
 });
 
-//  API /to add a new team member to DB
 app.post('/teams', async (req, res) => {
   try {
-    const newMember = new Team(req.body);
+    const newMember = new userModel(req.body); 
     await newMember.save();
     res.send("Team member added successfully");
   } catch (err) {
@@ -33,10 +32,9 @@ app.post('/teams', async (req, res) => {
   }
 });
 
-// API /to update a team member in DB
 app.put('/teams/:id', async (req, res) => {
   try {
-    await Team.findByIdAndUpdate(req.params.id, req.body);
+    await userModel.findByIdAndUpdate(req.params.id, req.body); 
     res.send("Team member updated successfully");
   } catch (err) {
     console.error(err);
@@ -44,10 +42,9 @@ app.put('/teams/:id', async (req, res) => {
   }
 });
 
-// API /to delete a team member from DB
 app.delete('/teams/:id', async (req, res) => {
   try {
-    await Team.findByIdAndDelete(req.params.id);
+    await userModel.findByIdAndDelete(req.params.id); 
     res.send("Team member deleted successfully");
   } catch (err) {
     console.error(err);
@@ -55,14 +52,16 @@ app.delete('/teams/:id', async (req, res) => {
   }
 });
 
-// API /to fetch userdata from DB
-app.get('/users',async(req,res)=>{  
-try{const data=await userModel.find();
+app.get('/users', async (req, res) => {
+  try {
+    const data = await userModel.find();
     res.send(data);
-}catch(err){
+  } catch (err) {
     console.log(err);
-}
-})
+    res.status(500).send("Error fetching users");
+  }
+});
+
 
 app.get('/tasks', async (req, res) => {
   try {

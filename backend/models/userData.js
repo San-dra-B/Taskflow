@@ -1,6 +1,5 @@
 const mongoose=require('mongoose');
 const userschema=mongoose.Schema({
-    _id:"string",
     name:"string",
     email:"string",
     role:"string"

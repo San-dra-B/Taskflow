@@ -14,13 +14,13 @@ const Signin = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get('http://localhost:4000/users')
+    axios.get('http://localhost:4000/teams')
       .then(res => setUsers(res.data))
-      .catch(err => console.error("Error fetching users:", err));
+      .catch(err => console.error("Error fetching team members:", err));
   }, []);
 
   const filtered = users.filter(u =>
-    u.role?.trim().toLowerCase() === role.toLowerCase()
+    u.role?.trim().toLowerCase() === (role === 'member' ? 'team-member' : 'admin')
   );
 
   const selectedUser = filtered.find(u => u._id === userId);
@@ -46,8 +46,9 @@ const Signin = () => {
       <Stack spacing={3} sx={{ width: 300 }}>
 
         <FormControl fullWidth>
-          <InputLabel>Select Role</InputLabel>
+          <InputLabel id="role-label">Select Role</InputLabel>
           <Select
+            labelId="role-label"
             value={role}
             onChange={(e) => {
               setRole(e.target.value);
@@ -63,8 +64,9 @@ const Signin = () => {
 
         {role && (
           <FormControl fullWidth>
-            <InputLabel>Select User</InputLabel>
+            <InputLabel id="user-label">Select User</InputLabel>
             <Select
+              labelId="user-label"
               value={userId}
               onChange={(e) => {
                 setUserId(e.target.value);
