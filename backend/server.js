@@ -10,6 +10,51 @@ const taskModel = require('./models/taskData');
 app.use(cors());
 app.use(express.json()); 
 
+//  API /to fetch all team members from DB
+app.get('/teams', async (req, res) => {
+  try {
+    const data = await Team.find();
+    res.send(data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error fetching team members");
+  }
+});
+
+//  API /to add a new team member to DB
+app.post('/teams', async (req, res) => {
+  try {
+    const newMember = new Team(req.body);
+    await newMember.save();
+    res.send("Team member added successfully");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error adding team member");
+  }
+});
+
+// API /to update a team member in DB
+app.put('/teams/:id', async (req, res) => {
+  try {
+    await Team.findByIdAndUpdate(req.params.id, req.body);
+    res.send("Team member updated successfully");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error updating team member");
+  }
+});
+
+// API /to delete a team member from DB
+app.delete('/teams/:id', async (req, res) => {
+  try {
+    await Team.findByIdAndDelete(req.params.id);
+    res.send("Team member deleted successfully");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error deleting team member");
+  }
+});
+
 // API /to fetch userdata from DB
 app.get('/users',async(req,res)=>{  
 try{const data=await userModel.find();
