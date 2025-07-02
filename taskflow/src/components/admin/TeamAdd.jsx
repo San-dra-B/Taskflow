@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
-  TextField, Button, MenuItem, Stack
+  TextField, Button, Stack
 } from '@mui/material';
 
 const TeamAdd = ({ initialData, onSave, onCancel }) => {
@@ -36,12 +36,27 @@ const TeamAdd = ({ initialData, onSave, onCancel }) => {
       <DialogTitle>{initialData ? 'Edit Team Member' : 'Add New Team Member'}</DialogTitle>
       <DialogContent>
         <Stack spacing={2} mt={1}>
-          <TextField name="name" label="Name" value={form.name} onChange={handleChange} fullWidth />
-          <TextField name="email" label="Email" value={form.email} onChange={handleChange} fullWidth />
-          <TextField name="role" label="Role" select value={form.role} onChange={handleChange} fullWidth>
-            <MenuItem value="admin">Admin</MenuItem>
-            <MenuItem value="team-member">Team Member</MenuItem>
-          </TextField>
+          <TextField
+            name="name"
+            label="Name"
+            value={form.name}
+            onChange={handleChange}
+            fullWidth
+          />
+          <TextField
+            name="email"
+            label="Email"
+            value={form.email}
+            onChange={handleChange}
+            fullWidth
+          />
+          <TextField
+            name="role"
+            label="Role"
+            value={form.role}
+            onChange={handleChange}
+            fullWidth
+          />
         </Stack>
       </DialogContent>
       <DialogActions>

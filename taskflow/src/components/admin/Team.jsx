@@ -81,23 +81,25 @@ const Team = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {team.map((member) => (
-              <TableRow key={member._id}>
-                <TableCell>{member.name}</TableCell>
-                <TableCell>{member.email}</TableCell>
-                <TableCell>{member.role}</TableCell>
-                <TableCell align="right">
-                  <Stack spacing={1} direction="row" justifyContent="flex-end">
-                    <Button variant="outlined" color="secondary" onClick={() => setEditMember(member)}>
-                      Edit
-                    </Button>
-                    <Button variant="outlined" color="error" onClick={() => handleDelete(member._id)}>
-                      Delete
-                    </Button>
-                  </Stack>
-                </TableCell>
-              </TableRow>
-            ))}
+            {team
+              .filter(member => member.role?.toLowerCase() !== 'admin')
+              .map((member) => (
+                <TableRow key={member._id}>
+                  <TableCell>{member.name}</TableCell>
+                  <TableCell>{member.email}</TableCell>
+                  <TableCell>{member.role}</TableCell>
+                  <TableCell align="right">
+                    <Stack spacing={1} direction="row" justifyContent="flex-end">
+                      <Button variant="outlined" color="secondary" onClick={() => setEditMember(member)}>
+                        Edit
+                      </Button>
+                      <Button variant="outlined" color="error" onClick={() => handleDelete(member._id)}>
+                        Delete
+                      </Button>
+                    </Stack>
+                  </TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </TableContainer>
