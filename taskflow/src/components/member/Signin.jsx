@@ -19,9 +19,13 @@ const Signin = () => {
       .catch(err => console.error("Error fetching team members:", err));
   }, []);
 
-  const filtered = users.filter(u =>
-    u.role?.trim().toLowerCase() === (role === 'member' ? 'team-member' : 'admin')
-  );
+  // 🔥 Fix: Filter based on "admin" vs everyone else
+  const filtered = users.filter(u => {
+    const r = u.role?.trim().toLowerCase() || '';
+    return role === 'admin'
+      ? r === 'admin'
+      : r !== 'admin'; // all other roles are treated as team members
+  });
 
   const selectedUser = filtered.find(u => u._id === userId);
 
@@ -74,11 +78,15 @@ const Signin = () => {
               }}
               label="Select User"
             >
-              {filtered.map((u) => (
-                <MenuItem key={u._id} value={u._id}>
-                  {u.name}
-                </MenuItem>
-              ))}
+              {filtered.length > 0 ? (
+                filtered.map((u) => (
+                  <MenuItem key={u._id} value={u._id}>
+                    {u.name}
+                  </MenuItem>
+                ))
+              ) : (
+                <MenuItem disabled>No users found for selected role</MenuItem>
+              )}
             </Select>
           </FormControl>
         )}

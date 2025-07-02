@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import {
   Box, Typography, Table, TableBody, TableCell, TableContainer,
-  TableHead, TableRow, Paper, Stack, Button
+  TableHead, TableRow, Paper, Stack, Button, IconButton
 } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+
 import TeamAdd from './TeamAdd';
 import axios from 'axios';
 
@@ -53,6 +56,7 @@ const Team = () => {
   return (
     <Box sx={{ p: 4 }}>
       <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold' }}>Team Management</Typography>
+
       {!editMember && !adding && (
         <Button variant="contained" sx={{ mb: 2 }} onClick={() => setAdding(true)}>
           + Add Team Member
@@ -77,7 +81,7 @@ const Team = () => {
               <TableCell><b>Name</b></TableCell>
               <TableCell><b>Email</b></TableCell>
               <TableCell><b>Role</b></TableCell>
-              <TableCell align="right"><b>Actions</b></TableCell>
+              <TableCell align="center"><b>Actions</b></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -88,14 +92,14 @@ const Team = () => {
                   <TableCell>{member.name}</TableCell>
                   <TableCell>{member.email}</TableCell>
                   <TableCell>{member.role}</TableCell>
-                  <TableCell align="right">
-                    <Stack spacing={1} direction="row" justifyContent="flex-end">
-                      <Button variant="outlined" color="secondary" onClick={() => setEditMember(member)}>
-                        Edit
-                      </Button>
-                      <Button variant="outlined" color="error" onClick={() => handleDelete(member._id)}>
-                        Delete
-                      </Button>
+                  <TableCell align="center">
+                    <Stack direction="row" spacing={1} justifyContent="center">
+                      <IconButton color="primary" onClick={() => setEditMember(member)}>
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton color="error" onClick={() => handleDelete(member._id)}>
+                        <DeleteIcon />
+                      </IconButton>
                     </Stack>
                   </TableCell>
                 </TableRow>
