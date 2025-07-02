@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import {
   Box, Typography, Card, CardContent, Grid,
-  FormControl, InputLabel, Select, MenuItem, Table,
-  TableBody, TableCell, TableContainer, TableHead,
-  TableRow, Paper
+  IconButton, Menu, MenuItem, Table, TableBody,
+  TableCell, TableContainer, TableHead, TableRow,
+  Paper, FormControl, InputLabel, Select, Button
 } from '@mui/material';
+import FilterListIcon from '@mui/icons-material/FilterList';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import axios from 'axios';
 
@@ -14,53 +15,42 @@ const DashBoard = () => {
   const [projects, setProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState('');
   const [selectedMember, setSelectedMember] = useState('');
+  const [anchorEl, setAnchorEl] = useState(null);
 
   useEffect(() => {
-    axios.get('http://localhost:4000/tasks')
-      .then(res => setTasks(res.data))
-      .catch(err => console.error('Error fetching tasks:', err));
-
-    axios.get('http://localhost:4000/users')
-      .then(res => setMembers(res.data))
-      .catch(err => console.error('Error fetching users:', err));
-
-    axios.get('http://localhost:4000/projects')
-      .then(res => setProjects(res.data))
-      .catch(err => console.error('Error fetching projects:', err));
+    axios.get('http://localhost:4000/tasks').then(res => setTasks(res.data));
+    axios.get('http://localhost:4000/users').then(res => setMembers(res.data));
+    axios.get('http://localhost:4000/projects').then(res => setProjects(res.data));
   }, []);
 
-  const filteredTasks = tasks.filter(task => {
-    return (
-      (!selectedProject || task.project?._id === selectedProject) &&
-      (!selectedMember || task.assignedTo === selectedMember)
-    );
-  });
+  const filteredTasks = tasks.filter(task =>
+    (!selectedProject || task.project?._id === selectedProject) &&
+    (!selectedMember || task.assignedTo === selectedMember)
+  );
 
   const completedStatuses = ['Done', 'Completed'];
   const totalTasks = tasks.length;
-  const completedTasks = tasks.filter(task => completedStatuses.includes(task.status)).length;
+  const completedTasks = tasks.filter(t => completedStatuses.includes(t.status)).length;
   const pendingTasks = totalTasks - completedTasks;
 
-  const getProjectTitle = (id) => {
-    const project = projects.find(p => p._id === id);
-    return project ? project.title : 'Unknown';
-  };
-
-  const getMemberName = (idOrName) => {
-    const member = members.find(m => m._id === idOrName || m.name === idOrName);
-    return member ? member.name : idOrName;
-  };
+  const getProjectTitle = id => projects.find(p => p._id === id)?.title || 'Unknown';
+  const getMemberName = id => members.find(m => m._id === id || m.name === id)?.name || id;
 
   const chartData = projects.map(project => {
     const relatedTasks = tasks.filter(t => t.project === project._id || t.project?._id === project._id);
     const completed = relatedTasks.filter(t => completedStatuses.includes(t.status)).length;
     const pending = relatedTasks.length - completed;
-    return {
-      name: project.title,
-      completed,
-      pending
-    };
+    return { name: project.title, completed, pending };
   });
+
+  const handleFilterClick = (e) => setAnchorEl(e.currentTarget);
+  const handleFilterClose = () => setAnchorEl(null);
+  const handleProjectChange = (e) => setSelectedProject(e.target.value);
+  const handleMemberChange = (e) => setSelectedMember(e.target.value);
+  const clearFilters = () => {
+    setSelectedProject('');
+    setSelectedMember('');
+  };
 
   return (
     <Box p={3}>
@@ -95,48 +85,42 @@ const DashBoard = () => {
         </Grid>
       </Grid>
 
-      {/* Filters in Card */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Typography variant="h6" gutterBottom>Filter Tasks</Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Project</InputLabel>
-                <Select
-                  value={selectedProject}
-                  onChange={(e) => setSelectedProject(e.target.value)}
-                  label="Project"
-                  MenuProps={{ PaperProps: { sx: { maxHeight: 300, overflowY: 'auto' } } }}
-                >
-                  <MenuItem value="">All Projects</MenuItem>
-                  {projects.map(p => (
-                    <MenuItem key={p._id} value={p._id}>{p.title}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Team Member</InputLabel>
-                <Select
-                  value={selectedMember}
-                  onChange={(e) => setSelectedMember(e.target.value)}
-                  label="Team Member"
-                  MenuProps={{ PaperProps: { sx: { maxHeight: 300, overflowY: 'auto' } } }}
-                >
-                  <MenuItem value="">All Members</MenuItem>
-                  {members.filter(m => m.role !== 'Admin').map(m => (
-                    <MenuItem key={m._id} value={m.name}>{m.name}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-          </Grid>
-        </CardContent>
-      </Card>
+      {/* Filter Button and Menu */}
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+        <IconButton onClick={handleFilterClick}>
+          <FilterListIcon />
+        </IconButton>
+      </Box>
 
-      {/* Task Table */}
+      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleFilterClose}>
+        <Box px={2} py={1} width={220}>
+          <FormControl fullWidth size="small" sx={{ mb: 1 }}>
+            <InputLabel>Project</InputLabel>
+            <Select value={selectedProject} onChange={handleProjectChange} label="Project">
+              <MenuItem value="">All Projects</MenuItem>
+              {projects.map(p => (
+                <MenuItem key={p._id} value={p._id}>{p.title}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl fullWidth size="small">
+            <InputLabel>Team Member</InputLabel>
+            <Select value={selectedMember} onChange={handleMemberChange} label="Team Member">
+              <MenuItem value="">All Members</MenuItem>
+              {members.filter(m => m.role !== 'Admin').map(m => (
+                <MenuItem key={m._id} value={m.name}>{m.name}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <Button onClick={clearFilters} fullWidth size="small" sx={{ mt: 1 }}>
+            Clear Filters
+          </Button>
+        </Box>
+      </Menu>
+
+      {/* Filtered Tasks Table */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Typography variant="h6" gutterBottom>Filtered Tasks</Typography>
@@ -167,20 +151,22 @@ const DashBoard = () => {
         </CardContent>
       </Card>
 
-      {/* Bar Chart Card */}
-      <Card>
+      {/* Chart Card */}
+      <Card sx={{ mb: 3 }}>
         <CardContent>
           <Typography variant="h6" gutterBottom>Project-wise Task Summary</Typography>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={chartData}>
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="completed" fill="#4caf50" name="Completed" />
-              <Bar dataKey="pending" fill="#f44336" name="Pending" />
-            </BarChart>
-          </ResponsiveContainer>
+          <Box sx={{ height: 300 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData}>
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="completed" fill="#4caf50" name="Completed" />
+                <Bar dataKey="pending" fill="#f44336" name="Pending" />
+              </BarChart>
+            </ResponsiveContainer>
+          </Box>
         </CardContent>
       </Card>
     </Box>
