@@ -95,79 +95,94 @@ const DashBoard = () => {
         </Grid>
       </Grid>
 
-      {/* Filters */}
-      <Grid container spacing={2} mb={3}>
-        <Grid item xs={12} sm={6}>
-          <FormControl fullWidth size="small">
-            <InputLabel>Project</InputLabel>
-            <Select
-              value={selectedProject}
-              onChange={(e) => setSelectedProject(e.target.value)}
-              label="Project"
-            >
-              <MenuItem value="">All Projects</MenuItem>
-              {projects.map(p => (
-                <MenuItem key={p._id} value={p._id}>{p.title}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <FormControl fullWidth size="small">
-            <InputLabel>Team Member</InputLabel>
-            <Select
-              value={selectedMember}
-              onChange={(e) => setSelectedMember(e.target.value)}
-              label="Team Member"
-            >
-              <MenuItem value="">All Members</MenuItem>
-              {members.filter(m => m.role !== 'Admin').map(m => (
-                <MenuItem key={m._id} value={m.name}>{m.name}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Grid>
-      </Grid>
+      {/* Filters in Card */}
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
+          <Typography variant="h6" gutterBottom>Filter Tasks</Typography>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Project</InputLabel>
+                <Select
+                  value={selectedProject}
+                  onChange={(e) => setSelectedProject(e.target.value)}
+                  label="Project"
+                  MenuProps={{ PaperProps: { sx: { maxHeight: 300, overflowY: 'auto' } } }}
+                >
+                  <MenuItem value="">All Projects</MenuItem>
+                  {projects.map(p => (
+                    <MenuItem key={p._id} value={p._id}>{p.title}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Team Member</InputLabel>
+                <Select
+                  value={selectedMember}
+                  onChange={(e) => setSelectedMember(e.target.value)}
+                  label="Team Member"
+                  MenuProps={{ PaperProps: { sx: { maxHeight: 300, overflowY: 'auto' } } }}
+                >
+                  <MenuItem value="">All Members</MenuItem>
+                  {members.filter(m => m.role !== 'Admin').map(m => (
+                    <MenuItem key={m._id} value={m.name}>{m.name}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
 
-      {/* Filtered Tasks Table */}
-      <Typography variant="h6" gutterBottom>Filtered Tasks</Typography>
-      <TableContainer component={Paper} sx={{ mb: 4 }}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell><b>Title</b></TableCell>
-              <TableCell><b>Project</b></TableCell>
-              <TableCell><b>Assigned To</b></TableCell>
-              <TableCell><b>Status</b></TableCell>
-              <TableCell><b>Comment</b></TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredTasks.map(task => (
-              <TableRow key={task._id}>
-                <TableCell>{task.title}</TableCell>
-                <TableCell>{getProjectTitle(task.project?._id || task.project)}</TableCell>
-                <TableCell>{getMemberName(task.assignedTo)}</TableCell>
-                <TableCell>{task.status}</TableCell>
-                <TableCell>{task.comment}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      {/* Task Table */}
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
+          <Typography variant="h6" gutterBottom>Filtered Tasks</Typography>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell><b>Title</b></TableCell>
+                  <TableCell><b>Project</b></TableCell>
+                  <TableCell><b>Assigned To</b></TableCell>
+                  <TableCell><b>Status</b></TableCell>
+                  <TableCell><b>Comment</b></TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filteredTasks.map(task => (
+                  <TableRow key={task._id}>
+                    <TableCell>{task.title}</TableCell>
+                    <TableCell>{getProjectTitle(task.project?._id || task.project)}</TableCell>
+                    <TableCell>{getMemberName(task.assignedTo)}</TableCell>
+                    <TableCell>{task.status}</TableCell>
+                    <TableCell>{task.comment}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </CardContent>
+      </Card>
 
-      {/* Bar Chart */}
-      <Typography variant="h6" gutterBottom>Project-wise Task Summary</Typography>
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={chartData}>
-          <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          <Bar dataKey="completed" fill="#4caf50" name="Completed" />
-          <Bar dataKey="pending" fill="#f44336" name="Pending" />
-        </BarChart>
-      </ResponsiveContainer>
+      {/* Bar Chart Card */}
+      <Card>
+        <CardContent>
+          <Typography variant="h6" gutterBottom>Project-wise Task Summary</Typography>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={chartData}>
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="completed" fill="#4caf50" name="Completed" />
+              <Bar dataKey="pending" fill="#f44336" name="Pending" />
+            </BarChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
     </Box>
   );
 };
