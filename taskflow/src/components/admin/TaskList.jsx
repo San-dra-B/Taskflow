@@ -27,17 +27,9 @@ const TaskList = () => {
   const [menuTask, setMenuTask] = useState(null);
 
   const fetchAll = () => {
-    axios.get('http://localhost:4000/tasks')
-      .then(res => setTasks(res.data))
-      .catch(err => console.error('Error fetching tasks:', err));
-
-    axios.get('http://localhost:4000/users')
-      .then(res => setMembers(res.data))
-      .catch(err => console.error('Error fetching users:', err));
-
-    axios.get('http://localhost:4000/projects')
-      .then(res => setProjects(res.data))
-      .catch(err => console.error('Error fetching projects:', err));
+    axios.get('http://localhost:4000/tasks').then(res => setTasks(res.data));
+    axios.get('http://localhost:4000/users').then(res => setMembers(res.data));
+    axios.get('http://localhost:4000/projects').then(res => setProjects(res.data));
   };
 
   useEffect(() => {
@@ -56,20 +48,13 @@ const TaskList = () => {
 
   const handleDelete = (id) => {
     if (window.confirm('Delete this task?')) {
-      axios.delete(`http://localhost:4000/tasks/${id}`)
-        .then(() => fetchAll())
-        .catch(err => console.error('Error deleting task:', err));
+      axios.delete(`http://localhost:4000/tasks/${id}`).then(fetchAll);
     }
   };
 
   const handleClose = () => {
     setOpen(false);
     fetchAll();
-  };
-
-  const getMemberName = (idOrName) => {
-    const member = members.find(m => m._id === idOrName || m.name === idOrName);
-    return member ? member.name : idOrName;
   };
 
   const handleFilterClick = (event) => {
@@ -80,28 +65,26 @@ const TaskList = () => {
     setFilterAnchorEl(null);
   };
 
-  const handleProjectChange = (e) => {
-    setSelectedProject(e.target.value);
-  };
-
-  const handleMemberChange = (e) => {
-    setSelectedMember(e.target.value);
-  };
-
+  const handleProjectChange = (e) => setSelectedProject(e.target.value);
+  const handleMemberChange = (e) => setSelectedMember(e.target.value);
   const clearFilters = () => {
     setSelectedProject('');
     setSelectedMember('');
   };
 
-  const filteredTasks = tasks.filter(task => {
-    return (
-      (!selectedProject || task.project?._id === selectedProject) &&
-      (!selectedMember || task.assignedTo === selectedMember)
-    );
-  });
+  const getMemberName = (id) => {
+    const member = members.find(m => m._id === id);
+    return member ? member.name : id;
+  };
+
+  const filteredTasks = tasks.filter(task =>
+    (!selectedProject || task.project?._id === selectedProject) &&
+    (!selectedMember || task.assignedTo === selectedMember)
+  );
 
   return (
     <Box sx={{ p: 4 }}>
+      {/* Header */}
       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h5" fontWeight="bold">All Tasks</Typography>
 
@@ -115,34 +98,39 @@ const TaskList = () => {
         </Stack>
       </Stack>
 
-      <Menu anchorEl={filterAnchorEl} open={Boolean(filterAnchorEl)} onClose={handleFilterClose}>
-        <Box px={2} py={1} width={220}>
-          <FormControl fullWidth size="small" sx={{ mb: 1 }}>
-            <InputLabel>Project</InputLabel>
-            <Select value={selectedProject} onChange={handleProjectChange} label="Project">
-              <MenuItem value="">All</MenuItem>
-              {projects.map(p => (
-                <MenuItem key={p._id} value={p._id}>{p.title}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+      {/* Filter Menu */}
+      <Menu
+        anchorEl={filterAnchorEl}
+        open={Boolean(filterAnchorEl)}
+        onClose={handleFilterClose}
+        PaperProps={{ sx: { p: 2, width: 250 } }}
+      >
+        <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+          <InputLabel>Project</InputLabel>
+          <Select value={selectedProject} onChange={handleProjectChange} label="Project">
+            <MenuItem value="">All Projects</MenuItem>
+            {projects.map(p => (
+              <MenuItem key={p._id} value={p._id}>{p.title}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
-          <FormControl fullWidth size="small">
-            <InputLabel>Team Member</InputLabel>
-            <Select value={selectedMember} onChange={handleMemberChange} label="Assigned To">
-              <MenuItem value="">All</MenuItem>
-              {members.filter(m => m.role !== 'Admin').map(m => (
-                <MenuItem key={m._id} value={m.name}>{m.name}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+        <FormControl fullWidth size="small">
+          <InputLabel>Team Member</InputLabel>
+          <Select value={selectedMember} onChange={handleMemberChange} label="Assigned To">
+            <MenuItem value="">All Members</MenuItem>
+            {members.filter(m => m.role?.toLowerCase() !== 'admin').map(m => (
+              <MenuItem key={m._id} value={m._id}>{m.name}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
-          <Button onClick={clearFilters} fullWidth size="small" sx={{ mt: 1 }}>
-            Clear Filters
-          </Button>
-        </Box>
+        <Button onClick={clearFilters} fullWidth size="small" sx={{ mt: 2 }}>
+          Clear Filters
+        </Button>
       </Menu>
 
+      {/* Task Table */}
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -152,7 +140,7 @@ const TaskList = () => {
               <TableCell><b>Assigned To</b></TableCell>
               <TableCell><b>Project</b></TableCell>
               <TableCell><b>Due Date</b></TableCell>
-              <TableCell align="center"><b></b></TableCell>
+              <TableCell align="center"><b>Actions</b></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -164,25 +152,21 @@ const TaskList = () => {
                 <TableCell>{task.project?.title || 'Unknown'}</TableCell>
                 <TableCell>{task.dueDate}</TableCell>
                 <TableCell align="center">
-
-                  <Stack direction="row" spacing={1} justifyContent="center" alignItems="center">
-                    
+                  <Stack direction="row" spacing={1} justifyContent="center">
                     <IconButton color="primary" onClick={() => handleEdit(task)}>
                       <EditIcon />
                     </IconButton>
-
                     <IconButton color="error" onClick={() => handleDelete(task._id)}>
                       <DeleteIcon />
                     </IconButton>
-
                     <IconButton
                       onClick={(e) => {
                         setMenuAnchor(e.currentTarget);
                         setMenuTask(task);
-                      }}>
+                      }}
+                    >
                       <MoreVertIcon />
                     </IconButton>
-
                   </Stack>
                 </TableCell>
               </TableRow>
@@ -191,18 +175,13 @@ const TaskList = () => {
         </Table>
       </TableContainer>
 
+      {/* Status/Comment Menu */}
       <Menu
         anchorEl={menuAnchor}
         open={Boolean(menuAnchor)}
         onClose={() => setMenuAnchor(null)}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
         <Box px={2} py={1}>
           <Typography variant="body2"><b>Status:</b> {menuTask?.status || 'None'}</Typography>
@@ -210,11 +189,12 @@ const TaskList = () => {
         </Box>
       </Menu>
 
+      {/* Dialog */}
       <TaskForm
         open={open}
         onClose={handleClose}
         task={selectedTask}
-        members={members}
+        members={members.filter(m => m.role?.toLowerCase() !== 'admin')}
         projects={projects}
       />
     </Box>

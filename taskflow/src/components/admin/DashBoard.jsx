@@ -6,7 +6,10 @@ import {
   Paper, FormControl, InputLabel, Select, Button
 } from '@mui/material';
 import FilterListIcon from '@mui/icons-material/FilterList';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import {
+  BarChart, Bar, XAxis, YAxis, Tooltip,
+  Legend, ResponsiveContainer
+} from 'recharts';
 import axios from 'axios';
 
 const DashBoard = () => {
@@ -37,7 +40,9 @@ const DashBoard = () => {
   const getMemberName = id => members.find(m => m._id === id || m.name === id)?.name || id;
 
   const chartData = projects.map(project => {
-    const relatedTasks = tasks.filter(t => t.project === project._id || t.project?._id === project._id);
+    const relatedTasks = tasks.filter(t =>
+      t.project === project._id || t.project?._id === project._id
+    );
     const completed = relatedTasks.filter(t => completedStatuses.includes(t.status)).length;
     const pending = relatedTasks.length - completed;
     return { name: project.title, completed, pending };
@@ -54,76 +59,63 @@ const DashBoard = () => {
 
   return (
     <Box p={3}>
-      <Typography variant="h5" gutterBottom>Project Tasks Tracker</Typography>
-      <Typography variant="subtitle1" gutterBottom>Welcome, Admin</Typography>
+      <Typography variant="h5" gutterBottom><b>Project Tasks Tracker</b></Typography>
+      <Typography variant="h6" gutterBottom>Welcome, Admin</Typography>
 
-      {/* Overview Cards */}
-      <Grid container spacing={2} mb={2}>
-        <Grid item xs={12} sm={4}>
-          <Card sx={{ bgcolor: '#e3f2fd' }}>
-            <CardContent>
-              <Typography>Total Tasks</Typography>
-              <Typography variant="h5" fontWeight="bold">{totalTasks}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={4}>
-          <Card sx={{ bgcolor: '#e8f5e9' }}>
-            <CardContent>
-              <Typography>Completed Tasks</Typography>
-              <Typography variant="h5" fontWeight="bold">{completedTasks}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={4}>
-          <Card sx={{ bgcolor: '#ffebee' }}>
-            <CardContent>
-              <Typography>Pending Tasks</Typography>
-              <Typography variant="h5" fontWeight="bold">{pendingTasks}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-
-      {/* Filter Button and Menu */}
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-        <IconButton onClick={handleFilterClick}>
-          <FilterListIcon />
-        </IconButton>
-      </Box>
-
-      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleFilterClose}>
-        <Box px={2} py={1} width={220}>
-          <FormControl fullWidth size="small" sx={{ mb: 1 }}>
-            <InputLabel>Project</InputLabel>
-            <Select value={selectedProject} onChange={handleProjectChange} label="Project">
-              <MenuItem value="">All Projects</MenuItem>
-              {projects.map(p => (
-                <MenuItem key={p._id} value={p._id}>{p.title}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          <FormControl fullWidth size="small">
-            <InputLabel>Team Member</InputLabel>
-            <Select value={selectedMember} onChange={handleMemberChange} label="Team Member">
-              <MenuItem value="">All Members</MenuItem>
-              {members.filter(m => m.role !== 'Admin').map(m => (
-                <MenuItem key={m._id} value={m.name}>{m.name}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          <Button onClick={clearFilters} fullWidth size="small" sx={{ mt: 1 }}>
-            Clear Filters
-          </Button>
-        </Box>
-      </Menu>
+      {/* Progress Summary Card */}
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={4}>
+              <Card sx={{ bgcolor: '#e3f2fd' }}>
+                <CardContent>
+                  <Typography>Total Tasks</Typography>
+                  <Typography variant="h5" fontWeight="bold">{totalTasks}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <Card sx={{ bgcolor: '#e8f5e9' }}>
+                <CardContent>
+                  <Typography>Completed Tasks</Typography>
+                  <Typography variant="h5" fontWeight="bold">{completedTasks}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <Card sx={{ bgcolor: '#ffebee' }}>
+                <CardContent>
+                  <Typography>Pending Tasks</Typography>
+                  <Typography variant="h5" fontWeight="bold">{pendingTasks}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
 
       {/* Filtered Tasks Table */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
-          <Typography variant="h6" gutterBottom>Filtered Tasks</Typography>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Typography variant="h6">Filtered Tasks</Typography>
+            <IconButton
+              onClick={handleFilterClick}
+              sx={{
+                backgroundColor: '#e0f7fa',
+                borderRadius: 2,
+                p: 1,
+                boxShadow: 1,
+                '&:hover': {
+                  backgroundColor: '#b2ebf2',
+                  transform: 'scale(1.05)',
+                },
+              }}
+            >
+              <FilterListIcon />
+            </IconButton>
+          </Box>
+
           <TableContainer component={Paper}>
             <Table>
               <TableHead>
@@ -151,8 +143,39 @@ const DashBoard = () => {
         </CardContent>
       </Card>
 
-      {/* Chart Card */}
-      <Card sx={{ mb: 3 }}>
+      {/* Filter Popover */}
+      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleFilterClose}>
+        <Box px={2} py={1} width={220}>
+          <FormControl fullWidth size="small" sx={{ mb: 1 }}>
+            <InputLabel>Project</InputLabel>
+            <Select value={selectedProject} onChange={handleProjectChange} label="Project">
+              <MenuItem value="">All Projects</MenuItem>
+              {projects.map(p => (
+                <MenuItem key={p._id} value={p._id}>{p.title}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl fullWidth size="small">
+            <InputLabel>Team Member</InputLabel>
+            <Select value={selectedMember} onChange={handleMemberChange} label="Team Member">
+              <MenuItem value="">All Members</MenuItem>
+              {members
+                .filter(m => m.role?.toLowerCase() !== 'admin')
+                .map(m => (
+                  <MenuItem key={m._id} value={m._id}>{m.name}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <Button onClick={clearFilters} fullWidth size="small" sx={{ mt: 1 }}>
+            Clear Filters
+          </Button>
+        </Box>
+      </Menu>
+
+      {/* Chart */}
+      <Card>
         <CardContent>
           <Typography variant="h6" gutterBottom>Project-wise Task Summary</Typography>
           <Box sx={{ height: 300 }}>
